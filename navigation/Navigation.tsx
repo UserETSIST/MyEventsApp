@@ -18,10 +18,10 @@ const HomeStackNavigator = createStackNavigator();
 
 function Stack() {
   return (
-    <HomeStackNavigator.Navigator initialRouteName="Home">
-      <HomeStackNavigator.Screen name="Home" component={HomeScreen} />
+    <HomeStackNavigator.Navigator  id={undefined as any} initialRouteName="Home">
+      <HomeStackNavigator.Screen  name="Home" component={HomeScreen}  options={{ headerShown: false }}/>
       <HomeStackNavigator.Screen name="New" component={FormScreen} />
-      <HomeStackNavigator.Screen name="Category" component={CategoryScreen} options={{ title: 'Eventos por Categoría' }}/>
+      <HomeStackNavigator.Screen name="CategoryScreen" component={CategoryScreen} options={{ title: 'Eventos por Categoría' }}/>
     </HomeStackNavigator.Navigator>
   );
 }
@@ -32,7 +32,7 @@ const Tab = createBottomTabNavigator();
 export function MyTabs() {
     return (
       
-       <Tab.Navigator 
+       <Tab.Navigator id={undefined as any}
        screenOptions={{
         tabBarActiveTintColor: 'purple',
         tabBarInactiveTintColor: 'gray',
