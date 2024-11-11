@@ -2,8 +2,9 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+import { createStackNavigator } from '@react-navigation/stack';
+// import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 //screens
@@ -13,7 +14,7 @@ import FormScreen from "../screens/FormScreen";
 import CategoryScreen from '../screens/CategoryScreen';
 
 
-const HomeStackNavigator = createNativeStackNavigator();
+const HomeStackNavigator = createStackNavigator();
 
 function Stack() {
   return (
@@ -48,7 +49,7 @@ export function MyTabs() {
       }}
        >
             <Tab.Screen  name="Home"
-              component={HomeScreen}
+              component={Stack}
               options={{
                 tabBarLabel: 'Home',
                 tabBarIcon: ({ color, size }) => (

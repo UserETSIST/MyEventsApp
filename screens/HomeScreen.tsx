@@ -57,7 +57,7 @@ function HomeScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Eventos en tu ciudad</Text>
-          <CustomButton title="Añadir evento" onPress={() => Alert.alert("hq")} />
+          <CustomButton title="Añadir evento" onPress={() => navigation.navigate("New")} />
         </View>
 
         <View style={styles.categories}>
