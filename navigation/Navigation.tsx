@@ -18,8 +18,8 @@ const HomeStackNavigator = createStackNavigator();
 
 function Stack() {
   return (
-    <HomeStackNavigator.Navigator  id={undefined as any} initialRouteName="Home">
-      <HomeStackNavigator.Screen  name="Home" component={HomeScreen}  options={{ headerShown: false }}/>
+    <HomeStackNavigator.Navigator  id={undefined as any} initialRouteName="HomeScreen">
+      <HomeStackNavigator.Screen  name="HomeScreen" component={HomeScreen}  options={{ headerShown: false }}/>
       <HomeStackNavigator.Screen name="New" component={FormScreen} />
       <HomeStackNavigator.Screen name="CategoryScreen" component={CategoryScreen} options={{ title: 'Eventos por Categoría' }}/>
     </HomeStackNavigator.Navigator>

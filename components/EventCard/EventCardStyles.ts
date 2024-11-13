@@ -8,6 +8,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 12,
     elevation: 2,
+    position: 'relative', // Enables absolute positioning for the favorite button
   },
   eventImage: {
     width: 100,
@@ -27,6 +28,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888',
     marginTop: 4,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Semi-transparent background
+    borderRadius: 16,
+    padding: 6,
+    elevation: 3, // Adds shadow to the button
   },
 });
 
