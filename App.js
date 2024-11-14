@@ -1,10 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
 import Navigation from './navigation/Navigation';
+import { FavoritesProvider } from './services/FavoritesContext';
 
 export default function App() {
   return (
-   <Navigation></Navigation>
+    <FavoritesProvider>
+      <Navigation></Navigation>
+    </FavoritesProvider>
   );
 }
 

@@ -1,102 +1,82 @@
-// src/services/getEventsService.tsx
-export const getAllEvents = () => {
-  return [
-    {
-      id: '1',
-      title: 'Festival de Música Electrónica',
-      date: '15 Nov 2024',
-      time: '20:00',
-      description: 'Un increíble festival con los mejores DJs de música electrónica.',
-      location: 'Parque Central',
-      category: 'Conciertos', // Categoría definida en el array de categorías
-      price: 50,
-      isPublic: true,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: '2',
-      title: 'Exposición de Arte Moderno',
-      date: '20 Nov 2024',
-      time: '10:00',
-      description: 'Explora las últimas tendencias del arte moderno en esta exposición única.',
-      location: 'Museo de Arte',
-      category: 'Exposiciones', // Categoría definida
-      price: 15,
-      isPublic: true,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: '3',
-      title: 'Maratón de la Ciudad',
-      date: '25 Nov 2024',
-      time: '07:00',
-      description: 'Únete al maratón más emocionante del año con miles de participantes.',
-      location: 'Plaza Principal',
-      category: 'Deportes', // Categoría definida
-      price: 0,
-      isPublic: true,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: '4',
-      title: 'Conferencia de Tecnología',
-      date: '10 Dec 2024',
-      time: '09:30',
-      description: 'Descubre las últimas innovaciones tecnológicas y conecta con expertos.',
-      location: 'Centro de Convenciones',
-      category: 'Tecnología', // Categoría definida
-      price: 100,
-      isPublic: false,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: '5',
-      title: 'Torneo de Ajedrez',
-      date: '5 Jan 2025',
-      time: '15:00',
-      description: 'Participa o asiste al torneo de ajedrez más prestigioso de la ciudad.',
-      location: 'Club de Ajedrez',
-      category: 'Cultura', // Categoría definida
-      price: 20,
-      isPublic: true,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: '6',
-      title: 'Obra de Teatro: Hamlet',
-      date: '18 Feb 2025',
-      time: '19:30',
-      description: 'Una interpretación clásica de Hamlet en un entorno moderno.',
-      location: 'Teatro Nacional',
-      category: 'Teatro', // Categoría definida
-      price: 25,
-      isPublic: true,
-      image: 'https://via.placeholder.com/150',
-    },
-    {
-      id: '7',
-      title: 'Ciclo de Cine al Aire Libre',
-      date: '25 Mar 2025',
-      time: '19:00',
-      description: 'Disfruta de una noche mágica con películas clásicas bajo las estrellas.',
-      location: 'Parque de la Ciudad',
-      category: 'Cultura', // Categoría definida
-      price: 5,
-      isPublic: true,
-      image: 'https://via.placeholder.com/150',
-    },
-  ];
+const categories = [
+  { id: '1', name: 'Conciertos' },
+  { id: '2', name: 'Exposiciones' },
+  { id: '3', name: 'Deportes' },
+  { id: '4', name: 'Teatro' },
+  { id: '5', name: 'Tecnología' },
+  { id: '6', name: 'Cultura' },
+];
+
+/**
+ * Fetches all events from the API, maps them to a desired format,
+ * and assigns category names based on the category ID.
+ */
+export const getAllEvents = async () => {
+  const API_URL =
+    'https://animalsveterinaria.net/go2event/api/v1.php?action=list&table=EVEN';
+
+  const headers = {
+    Authorization: `Basic QWRtaW46MTIzNDU=`, // Basic Authentication Header
+  };
+
+  try {
+    console.log('Fetching events from API...');
+    const response = await fetch(API_URL, { headers });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching events: ${response.statusText}`);
+    }
+
+    const apiEvents = await response.json();
+
+    // Map and transform API response to the desired structure
+    const transformedEvents = apiEvents.map((event: any) => {
+      const matchedCategory = categories.find(
+        (cat) => cat.id === event.ID_EVE.toString()
+      );
+
+      return {
+        id: event.ID.toString(),
+        title: event.TITULO || 'Evento sin título', // Default if title is null
+        date: event.FINICIO.split(' ')[0], // Extract date
+        time: event.FINICIO.split(' ')[1], // Extract time
+        description: event.DESCRIPCION || 'Sin descripción disponible',
+        location: event.UBICACION || 'Ubicación no especificada',
+        category: matchedCategory ? matchedCategory.name : 'General', // Fallback to 'General' if no match
+        price: event.ENTGRATUITA === 'Sí' ? 0 : 20, // Default price logic
+        isPublic: event.ENTGRATUITA === 'Sí', // Determine if it's public
+        image: event.IMAGEN || 'https://via.placeholder.com/150', // Fallback image
+      };
+    });
+
+    console.log('Transformed Events:', transformedEvents);
+    return transformedEvents;
+  } catch (error) {
+    console.error('Error loading events:', error.message);
+    return [];
+  }
 };
 
+/**
+ * Fetches a random subset of events by shuffling and slicing.
+ */
+export const getRandomEvents = async () => {
+  try {
+    const allEvents = await getAllEvents();
+    if (!allEvents.length) {
+      console.warn('No events available to fetch randomly.');
+      return [];
+    }
 
-  
-  export const getRandomEvents = () => {
-    const allEvents = getAllEvents();
-    const randomEvents = allEvents.sort(() => 0.5 - Math.random()).slice(0, 3);
+    // Shuffle and return a subset of 3 events
+    const randomEvents = allEvents
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+
+    console.log('Random Events:', randomEvents);
     return randomEvents;
-  };
-  
-
-
-
-  
+  } catch (error) {
+    console.error('Error fetching random events:', error.message);
+    return [];
+  }
+};

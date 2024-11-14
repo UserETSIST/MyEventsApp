@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; // For the star icon
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'; 
 import styles from './EventCardStyles';
+import { useFavorites } from '../../services/FavoritesContext'; 
 
 interface EventCardProps {
+  id: string;
   title: string;
   date: string;
   image: string;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ title, date, image }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+const EventCard: React.FC<EventCardProps> = ({ id, title, date, image }) => {
+  const { toggleFavorite, isFavorite } = useFavorites();
 
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite);
+  const handleFavoriteToggle = () => {
+    toggleFavorite({ id, title, date, image }); // Use the `toggleFavorite` function from the context
   };
 
   return (
@@ -25,11 +27,11 @@ const EventCard: React.FC<EventCardProps> = ({ title, date, image }) => {
       </View>
 
       {/* Favorite Button */}
-      <TouchableOpacity style={styles.favoriteButton} onPress={toggleFavorite}>
+      <TouchableOpacity style={styles.favoriteButton} onPress={handleFavoriteToggle}>
         <MaterialCommunityIcons
-          name={isFavorite ? 'star' : 'star-outline'}
+          name={isFavorite(id) ? 'star' : 'star-outline'} // Use the `isFavorite` function to determine the state
           size={24}
-          color={isFavorite ? 'gold' : '#888'}
+          color={isFavorite(id) ? 'gold' : '#888'}
         />
       </TouchableOpacity>
     </TouchableOpacity>

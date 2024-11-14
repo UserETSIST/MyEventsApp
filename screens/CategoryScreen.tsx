@@ -4,8 +4,8 @@ import EventCard from '../components/EventCard/EventCard';
 import { getAllEvents } from '../services/getEventsService';
 
 const CategoryScreen = ({ route }) => {
-  const { category } = route.params; // Recibe la categoría seleccionada
-  const events = getAllEvents().filter(event => event.category === category); // Filtra los eventos
+  const { category } = route.params; // Receives the selected category
+  const events = getAllEvents().filter((event) => event.category === category); // Filter events by category
 
   return (
     <View style={styles.container}>
@@ -16,6 +16,7 @@ const CategoryScreen = ({ route }) => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <EventCard
+              id={item.id} // Pass the id of the event
               title={item.title}
               date={item.date}
               image={item.image}

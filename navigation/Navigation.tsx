@@ -9,7 +9,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 //screens
 import HomeScreen from "../screens/HomeScreen";
-import BuyTicketsScreen from "../screens/BuyTicketsScreen";
+import FavoritesScreen from "../screens/FavoritesScreen";
 import FormScreen from "../screens/FormScreen";
 import CategoryScreen from '../screens/CategoryScreen';
 
@@ -64,12 +64,12 @@ export function MyTabs() {
                   <MaterialCommunityIcons name="plus-circle-outline" color={color} size={size} />
             ),
           }}/>
-            <Tab.Screen name="Comprar"
-              component={BuyTicketsScreen}
+            <Tab.Screen name="Favoritos"
+              component={FavoritesScreen}
               options={{
-                tabBarLabel: 'Comprar',
+                tabBarLabel: 'Favoritos',
                 tabBarIcon: ({ color, size }) => (
-                  <MaterialCommunityIcons name="ticket-outline" color={color} size={size} />
+                  <MaterialCommunityIcons name="star-outline" color={color} size={size} />
             ),
           }}/>
        </Tab.Navigator>
