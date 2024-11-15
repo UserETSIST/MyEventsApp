@@ -27,7 +27,8 @@ function HomeScreen() {
     { id: '6', name: 'Cultura' },
   ];
 
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState([]); // State for storing events
+  const [loading, setLoading] = useState(false); // State to handle loading
 
   // Fetch random events when the screen loads
   useEffect(() => {
@@ -35,9 +36,16 @@ function HomeScreen() {
   }, []);
 
   // Function to fetch random events
-  const fetchRandomEvents = () => {
-    const fetchedEvents = getRandomEvents();
-    setEvents(fetchedEvents);
+  const fetchRandomEvents = async () => {
+    try {
+      setLoading(true); // Start loading
+      const fetchedEvents = await getRandomEvents(); // Wait for async function
+      setEvents(fetchedEvents); // Update state with new events
+    } catch (error) {
+      console.error('Error fetching random events:', error.message);
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   return (
@@ -79,19 +87,23 @@ function HomeScreen() {
         {/* Featured Events */}
         <View style={styles.featuredEvents}>
           <Text style={styles.sectionTitle}>Eventos destacados</Text>
-          <FlatList
-            data={events}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <EventCard
-                id={item.id} // Pass the unique ID
-                title={item.title}
-                date={item.date}
-                image={item.image}
-              />
-            )}
-          />
+          {loading ? (
+            <Text style={styles.loadingText}>Cargando eventos...</Text>
+          ) : (
+            <FlatList
+              data={events}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <EventCard
+                  id={item.id} // Pass the unique ID
+                  title={item.title}
+                  date={item.date}
+                  image={item.image}
+                />
+              )}
+            />
+          )}
         </View>
 
         {/* Button to Load New Events */}
@@ -148,6 +160,12 @@ const styles = StyleSheet.create({
   },
   featuredEvents: {
     marginTop: 20,
+  },
+  loadingText: {
+    textAlign: 'center',
+    color: '#fff',
+    fontSize: 16,
+    fontStyle: 'italic',
   },
 });
 

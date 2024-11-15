@@ -22,18 +22,23 @@ export const getAllEvents = async () => {
   try {
     console.log('Fetching events from API...');
     const response = await fetch(API_URL, { headers });
-
+    
     if (!response.ok) {
       throw new Error(`Error fetching events: ${response.statusText}`);
     }
 
     const apiEvents = await response.json();
+    const data = apiEvents.data;
+    
+    
 
     // Map and transform API response to the desired structure
-    const transformedEvents = apiEvents.map((event: any) => {
+    const transformedEvents = data.map((event: any) => {
       const matchedCategory = categories.find(
-        (cat) => cat.id === event.ID_EVE.toString()
+        (cat) => cat.id === event.ID_TEVE.toString()
       );
+
+     
 
       return {
         id: event.ID.toString(),
@@ -73,7 +78,6 @@ export const getRandomEvents = async () => {
       .sort(() => Math.random() - 0.5)
       .slice(0, 3);
 
-    console.log('Random Events:', randomEvents);
     return randomEvents;
   } catch (error) {
     console.error('Error fetching random events:', error.message);
