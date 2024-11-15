@@ -11,29 +11,46 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import EventCard from '../components/EventCard/EventCard';
-import { getRandomEvents } from '../services/getEventsService';
+import { getRandomEvents, getEventTypes } from '../services/getEventsService'; // Adjust paths as necessary
 import CustomButton from '../components/CustomButton/CustomButton';
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+// Define the navigation parameter types
+export type RootStackParamList = {
+  HomeScreen: undefined;
+  CategoryScreen: { category: string };
+  New: undefined;
+};
+
+// Define the navigation prop type for HomeScreen
+type NavigationProp = StackNavigationProp<RootStackParamList, 'HomeScreen'>;
 
 function HomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>(); // Use typed navigation prop
 
-  const categories = [
-    { id: '1', name: 'Conciertos' },
-    { id: '2', name: 'Exposiciones' },
-    { id: '3', name: 'Deportes' },
-    { id: '4', name: 'Teatro' },
-    { id: '5', name: 'Tecnología' },
-    { id: '6', name: 'Cultura' },
-  ];
-
+  const [categories, setCategories] = useState([]); // Dynamic categories state
   const [events, setEvents] = useState([]); // State for storing events
-  const [loading, setLoading] = useState(false); // State to handle loading
+  const [loading, setLoading] = useState(false); // State to handle loading categories or events
 
-  // Fetch random events when the screen loads
+  // Fetch categories and random events when the screen loads
   useEffect(() => {
-    fetchRandomEvents();
+    fetchCategories(); // Load categories from API
+    fetchRandomEvents(); // Load initial random events
   }, []);
+
+  // Function to fetch categories from the API
+  const fetchCategories = async () => {
+    try {
+      setLoading(true); // Start loading
+      const fetchedCategories = await getEventTypes(); // Fetch event types from API
+      setCategories(fetchedCategories); // Update state with fetched categories
+    } catch (error) {
+      console.error('Error fetching categories:', error.message);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
 
   // Function to fetch random events
   const fetchRandomEvents = async () => {
@@ -46,6 +63,11 @@ function HomeScreen() {
     } finally {
       setLoading(false); // Stop loading
     }
+  };
+
+  // Navigate to the CategoryScreen with the selected category
+  const handleCategoryPress = (categoryName: string) => {
+    navigation.navigate('CategoryScreen', { category: categoryName });
   };
 
   return (
@@ -66,22 +88,24 @@ function HomeScreen() {
         {/* Categories */}
         <View style={styles.categories}>
           <Text style={styles.sectionTitle}>Categorías</Text>
-          <FlatList
-            data={categories}
-            horizontal
-            keyExtractor={(item) => item.id}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.categoryItem}
-                onPress={() =>
-                  navigation.navigate('CategoryScreen', { category: item.name })
-                }
-              >
-                <Text style={styles.categoryText}>{item.name}</Text>
-              </TouchableOpacity>
-            )}
-          />
+          {loading ? (
+            <Text style={styles.loadingText}>Cargando categorías...</Text>
+          ) : (
+            <FlatList
+              data={categories}
+              horizontal
+              keyExtractor={(item) => item.id}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.categoryItem}
+                  onPress={() => handleCategoryPress(item.name)} // Navigate using the helper function
+                >
+                  <Text style={styles.categoryText}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
         </View>
 
         {/* Featured Events */}
