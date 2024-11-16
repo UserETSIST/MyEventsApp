@@ -120,6 +120,7 @@ export const getEventsByCategory = async (categoryId: string) => {
     }
 
     const apiResponse = await response.json();
+    console.log("Dataaaa: ", apiResponse.data);
     
     if (!apiResponse.data) {
       throw new Error('No data received from the API');

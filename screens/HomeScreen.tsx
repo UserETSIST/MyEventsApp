@@ -73,6 +73,7 @@ function HomeScreen() {
 
   // Navigate to the EventDetailsScreen for the selected event
   const handleEventPress = (event: any) => {
+    console.log("Eventoo: ", event);
     navigation.navigate('EventDetailsScreen', { event });
   };
 
@@ -105,7 +106,7 @@ function HomeScreen() {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.categoryItem}
-                  onPress={() => handleCategoryPress(item.id, item.name)} // Pass ID and Name
+                  onPress={() => handleCategoryPress(item.id, item.name)} 
                 >
                   <Text style={styles.categoryText}>{item.name}</Text>
                 </TouchableOpacity>
