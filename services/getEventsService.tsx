@@ -1,16 +1,4 @@
-const categories = [
-  { id: '1', name: 'Conciertos' },
-  { id: '2', name: 'Exposiciones' },
-  { id: '3', name: 'Deportes' },
-  { id: '4', name: 'Teatro' },
-  { id: '5', name: 'Tecnología' },
-  { id: '6', name: 'Cultura' },
-];
 
-/**
- * Fetches all events from the API, maps them to a desired format,
- * and assigns category names based on the category ID.
- */
 export const getAllEvents = async () => {
   const API_URL =
     'https://animalsveterinaria.net/go2event/api/v1.php?action=list&table=EVEN';
@@ -112,6 +100,35 @@ export const getEventTypes = async () => {
     return transformedEventTypes;
   } catch (error) {
     console.error('Error loading event types:', error.message);
+    return [];
+  }
+};
+
+
+export const getEventsByCategory = async (categoryId: string) => {
+  const API_URL = `https://animalsveterinaria.net/go2event/api/v1.php?action=list&records=10&table=EVEN&q=(ID_TEVE~equals~${categoryId})`;
+  const headers = {
+    Authorization: 'Basic QWRtaW46MTIzNDU=', // Autenticación básica
+  };
+
+  try {
+    console.log(`Fetching events for category ID: ${categoryId}...`);
+    const response = await fetch(API_URL, { headers });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching events: ${response.statusText}`);
+    }
+
+    const apiResponse = await response.json();
+    
+    if (!apiResponse.data) {
+      throw new Error('No data received from the API');
+    }
+
+
+    return apiResponse.data;
+  } catch (error) {
+    console.error('Error loading events by category:', error.message);
     return [];
   }
 };

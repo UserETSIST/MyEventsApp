@@ -10,29 +10,29 @@ const EventDetailsScreen = ({ route }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Event Image */}
-      <Image source={{ uri: event.image }} style={styles.image} />
+      <Image source={{ uri: event.IMAGEN }} style={styles.image} />
 
       {/* Title Section */}
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{event.title}</Text>
+        <Text style={styles.title}>{event.TITULO}</Text>
       </View>
 
       {/* Event Details */}
       <View style={styles.infoContainer}>
         <View style={styles.infoRow}>
           <MaterialIcons name="date-range" size={20} color="#6a1b9a" />
-          <Text style={styles.infoText}>Fecha: {event.date}</Text>
+          <Text style={styles.infoText}>Fecha: {event.FINICIO}</Text>
         </View>
         <View style={styles.infoRow}>
           <MaterialIcons name="location-on" size={20} color="#6a1b9a" />
-          <Text style={styles.infoText}>Ubicación: {event.location}</Text>
+          <Text style={styles.infoText}>Ubicación: {event.UBICACION}</Text>
         </View>
       </View>
 
       {/* Description */}
       <View style={styles.descriptionContainer}>
         <Text style={styles.sectionTitle}>Descripción</Text>
-        <Text style={styles.description}>{event.description}</Text>
+        <Text style={styles.description}>{event.DESCRIPCION}</Text>
       </View>
     </ScrollView>
   );

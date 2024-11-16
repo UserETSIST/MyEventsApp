@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import EventCard from '../components/EventCard/EventCard';
-import { getAllEvents } from '../services/getEventsService';
+import { getEventsByCategory } from '../services/getEventsService'; // Función que acabamos de crear
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
@@ -13,7 +13,7 @@ type RootStackParamList = {
 type NavigationProp = StackNavigationProp<RootStackParamList, 'EventDetailsScreen'>;
 
 const CategoryScreen = ({ route }) => {
-  const { category } = route.params;
+  const { categoryId, categoryName } = route.params; 
   const navigation = useNavigation<NavigationProp>();
 
   const [events, setEvents] = useState([]);
@@ -23,11 +23,8 @@ const CategoryScreen = ({ route }) => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const allEvents = await getAllEvents();
-        const filteredEvents = allEvents.filter(
-          (event) => event.category === category
-        );
-        setEvents(filteredEvents);
+        const eventsByCategory = await getEventsByCategory(categoryId);
+        setEvents(eventsByCategory);
       } catch (error) {
         console.error('Error fetching events:', error);
       } finally {
@@ -36,11 +33,11 @@ const CategoryScreen = ({ route }) => {
     };
 
     fetchEvents();
-  }, [category]);
+  }, [categoryId]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Eventos de {category}</Text>
+      <Text style={styles.title}>Eventos de {categoryName}</Text>
       {loading ? (
         <Text style={styles.loadingText}>Cargando eventos...</Text>
       ) : events.length > 0 ? (
@@ -49,10 +46,10 @@ const CategoryScreen = ({ route }) => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <EventCard
-              id={item.id}
-              title={item.title}
-              date={item.date}
-              image={item.image}
+              id={item.ID}
+              title={item.TITULO}
+              date={item.FINICIO}
+              image={item.IMAGEN}
               onPress={() =>
                 navigation.navigate('EventDetailsScreen', { event: item })
               }

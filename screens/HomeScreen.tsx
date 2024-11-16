@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import EventCard from '../components/EventCard/EventCard';
-import { getRandomEvents, getEventTypes } from '../services/getEventsService'; 
+import { getRandomEvents, getEventTypes } from '../services/getEventsService';
 import CustomButton from '../components/CustomButton/CustomButton';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -19,8 +19,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 // Define the navigation parameter types
 export type RootStackParamList = {
   HomeScreen: undefined;
-  CategoryScreen: { category: string };
-  EventDetailsScreen: { event: any }; // Add EventDetailsScreen
+  CategoryScreen: { categoryId: string; categoryName: string };
+  EventDetailsScreen: { event: any };
   New: undefined;
 };
 
@@ -67,8 +67,8 @@ function HomeScreen() {
   };
 
   // Navigate to the CategoryScreen with the selected category
-  const handleCategoryPress = (categoryName: string) => {
-    navigation.navigate('CategoryScreen', { category: categoryName });
+  const handleCategoryPress = (categoryId: string, categoryName: string) => {
+    navigation.navigate('CategoryScreen', { categoryId, categoryName });
   };
 
   // Navigate to the EventDetailsScreen for the selected event
@@ -100,12 +100,12 @@ function HomeScreen() {
             <FlatList
               data={categories}
               horizontal
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.id.toString()}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.categoryItem}
-                  onPress={() => handleCategoryPress(item.name)} // Navigate using the helper function
+                  onPress={() => handleCategoryPress(item.id, item.name)} // Pass ID and Name
                 >
                   <Text style={styles.categoryText}>{item.name}</Text>
                 </TouchableOpacity>
@@ -122,7 +122,7 @@ function HomeScreen() {
           ) : (
             <FlatList
               data={events}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.id.toString()}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
                 <EventCard
