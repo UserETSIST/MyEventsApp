@@ -5,16 +5,14 @@ import { getAllEvents } from '../services/getEventsService';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-// Define the navigation parameter types directly here
+// Define navigation type
 type RootStackParamList = {
-  CategoryScreen: { category: string };
-  EventDetailsScreen: { event: any }; // Ensure `EventDetailsScreen` is defined
+  EventDetailsScreen: { event: any };
 };
 
-// Define the navigation prop type for this screen
-type NavigationProp = StackNavigationProp<RootStackParamList, 'CategoryScreen'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'EventDetailsScreen'>;
 
-const CategoryScreen = ({ route }: { route: { params: { category: string } } }) => {
+const CategoryScreen = ({ route }) => {
   const { category } = route.params;
   const navigation = useNavigation<NavigationProp>();
 
@@ -55,7 +53,9 @@ const CategoryScreen = ({ route }: { route: { params: { category: string } } }) 
               title={item.title}
               date={item.date}
               image={item.image}
-              onPress={() => navigation.navigate('EventDetailsScreen', { event: item })}
+              onPress={() =>
+                navigation.navigate('EventDetailsScreen', { event: item })
+              }
             />
           )}
         />

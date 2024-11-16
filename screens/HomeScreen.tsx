@@ -93,7 +93,7 @@ function HomeScreen() {
 
         {/* Categories */}
         <View style={styles.categories}>
-          <Text style={styles.sectionTitle}>Categorías</Text>
+          <Text style={styles.sectionTitle}>Buscar por categoría</Text>
           {loading ? (
             <Text style={styles.loadingText}>Cargando categorías...</Text>
           ) : (

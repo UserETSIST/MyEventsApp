@@ -3,19 +3,16 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   Switch,
-  ScrollView, 
-  Alert,
+  ScrollView,
+  TouchableOpacity,
 } from 'react-native';
-import { getEventTypes } from '../services/getEventsService'; 
+import { getEventTypes } from '../services/getEventsService';
 import { Picker } from '@react-native-picker/picker';
-
-
+import Modal from 'react-native-modal'; // Import the modal library
 
 const FormScreen = () => {
-  // States for inputs
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -26,15 +23,16 @@ const FormScreen = () => {
   const [contact, setContact] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [email, setEmail] = useState('');
-  const [category, setCategory] = useState(''); // Selected category ID
-  const [categories, setCategories] = useState([]); // Available categories
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
+  const [modalMessage, setModalMessage] = useState(''); // Modal message state
 
-  // Fetch categories from the API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const fetchedCategories = await getEventTypes();
-        setCategories(fetchedCategories); // Update categories state
+        setCategories(fetchedCategories);
       } catch (error) {
         console.error('Error fetching categories:', error.message);
       }
@@ -45,24 +43,22 @@ const FormScreen = () => {
 
   const handleSubmit = async () => {
     const eventData = {
-      ID_TEVE: category || "1", // ID por defecto si no se selecciona categoría
-      TITULO: title || "Título por defecto", // Título por defecto
-      UBICACION: location || "Ubicación por defecto", // Ubicación por defecto
-      DIRECCION: address || "Dirección por defecto", // Dirección por defecto
-      ENTGRATUITA: isFree ? "Sí" : "No", // Determina si es gratuito o no
-      FINICIO: startDate ? `${startDate}:00.000` : "2024-11-12 00:00:00.000", // Fecha de inicio predeterminada
-      FFINAL: endDate ? `${endDate}:00.000` : "2024-11-27 00:00:00.000", // Fecha final predeterminada
-      DESCRIPCION: description || "Descripción por defecto", // Descripción por defecto
-      IMAGEN: "https://via.placeholder.com/150", // Imagen predeterminada
-      CONTACTO: contact || "Contacto por defecto", // Contacto predeterminado
-      NOCONTACTO: contactNumber || "3132475803", // Número de contacto predeterminado
-      EMAILCONT: email || "email@por.defecto.com", // Email predeterminado
-      ESTADO: "Activo", // Estado predeterminado
+      ID_TEVE: category || '1',
+      TITULO: title || 'Título por defecto',
+      UBICACION: location || 'Ubicación por defecto',
+      DIRECCION: address || 'Dirección por defecto',
+      ENTGRATUITA: isFree ? 'Sí' : 'No',
+      FINICIO: startDate ? `${startDate}:00.000` : '2024-11-12 00:00:00.000',
+      FFINAL: endDate ? `${endDate}:00.000` : '2024-11-27 00:00:00.000',
+      DESCRIPCION: description || 'Descripción por defecto',
+      IMAGEN: 'https://via.placeholder.com/150',
+      CONTACTO: contact || 'Contacto por defecto',
+      NOCONTACTO: contactNumber || '3132475803',
+      EMAILCONT: email || 'email@por.defecto.com',
+      ESTADO: 'Activo',
     };
-    
 
     try {
-      console.log(eventData)
       const response = await fetch(
         'https://animalsveterinaria.net/go2event/api/v1.php?action=insert&table=even',
         {
@@ -75,11 +71,9 @@ const FormScreen = () => {
         }
       );
 
-      console.log("Responsee: ",response)
-
       if (response.ok) {
-        Alert.alert('¡Éxito!', 'El evento se ha creado correctamente.');
-        // Clear the form
+        setModalMessage('¡Éxito! El evento se ha creado correctamente.');
+        setIsModalVisible(true);
         setTitle('');
         setDescription('');
         setStartDate('');
@@ -93,11 +87,13 @@ const FormScreen = () => {
         setCategory('');
       } else {
         const errorResponse = await response.json();
-        Alert.alert('Error', `No se pudo crear el evento: ${errorResponse.message}`);
+        setModalMessage(`Error: No se pudo crear el evento: ${errorResponse.message}`);
+        setIsModalVisible(true);
       }
     } catch (error) {
       console.error('Error creating event:', error.message);
-      Alert.alert('Error', 'No se pudo conectar con la API.');
+      setModalMessage('Error: No se pudo conectar con la API.');
+      setIsModalVisible(true);
     }
   };
 
@@ -105,7 +101,6 @@ const FormScreen = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Crear Nuevo Evento</Text>
 
-      {/* Nombre del Evento */}
       <Text style={styles.label}>Nombre del Evento</Text>
       <TextInput
         style={styles.input}
@@ -114,21 +109,19 @@ const FormScreen = () => {
         onChangeText={setTitle}
       />
 
-      {/* Categoría */}
       <Text style={styles.label}>Categoría</Text>
-            <View style={styles.dropdown}>
-              <Picker
-                selectedValue={category}
-                onValueChange={(value) => setCategory(value)}
-              >
-                <Picker.Item label="Selecciona una categoría" value="" />
-                {categories.map((cat) => (
-                  <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
-                ))}
-              </Picker>
-            </View>
+      <View style={styles.dropdown}>
+        <Picker
+          selectedValue={category}
+          onValueChange={(value) => setCategory(value)}
+        >
+          <Picker.Item label="Selecciona una categoría" value="" />
+          {categories.map((cat) => (
+            <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
+          ))}
+        </Picker>
+      </View>
 
-      {/* Descripción */}
       <Text style={styles.label}>Descripción</Text>
       <TextInput
         style={[styles.input, styles.textArea]}
@@ -138,7 +131,6 @@ const FormScreen = () => {
         multiline
       />
 
-      {/* Fecha Inicio */}
       <Text style={styles.label}>Fecha Inicio (YYYY-MM-DD HH:MM)</Text>
       <TextInput
         style={styles.input}
@@ -147,7 +139,6 @@ const FormScreen = () => {
         onChangeText={setStartDate}
       />
 
-      {/* Fecha Final */}
       <Text style={styles.label}>Fecha Final (YYYY-MM-DD HH:MM)</Text>
       <TextInput
         style={styles.input}
@@ -156,7 +147,6 @@ const FormScreen = () => {
         onChangeText={setEndDate}
       />
 
-      {/* Ubicación */}
       <Text style={styles.label}>Ubicación</Text>
       <TextInput
         style={styles.input}
@@ -165,7 +155,6 @@ const FormScreen = () => {
         onChangeText={setLocation}
       />
 
-      {/* Dirección */}
       <Text style={styles.label}>Dirección</Text>
       <TextInput
         style={styles.input}
@@ -174,13 +163,11 @@ const FormScreen = () => {
         onChangeText={setAddress}
       />
 
-      {/* Entrada Gratuita */}
       <View style={styles.switchContainer}>
         <Text style={styles.label}>¿Entrada gratuita?</Text>
         <Switch value={isFree} onValueChange={setIsFree} />
       </View>
 
-      {/* Contacto */}
       <Text style={styles.label}>Contacto</Text>
       <TextInput
         style={styles.input}
@@ -189,7 +176,6 @@ const FormScreen = () => {
         onChangeText={setContact}
       />
 
-      {/* Número de Contacto */}
       <Text style={styles.label}>Número de Contacto</Text>
       <TextInput
         style={styles.input}
@@ -199,7 +185,6 @@ const FormScreen = () => {
         keyboardType="phone-pad"
       />
 
-      {/* Email */}
       <Text style={styles.label}>Email</Text>
       <TextInput
         style={styles.input}
@@ -209,8 +194,26 @@ const FormScreen = () => {
         keyboardType="email-address"
       />
 
-      {/* Botón para Guardar */}
-      <Button title="Guardar Evento" onPress={handleSubmit} color="purple" />
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Guardar Evento</Text>
+      </TouchableOpacity>
+
+      <Modal
+        isVisible={isModalVisible}
+        onBackdropPress={() => setIsModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+      >
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalText}>{modalMessage}</Text>
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => setIsModalVisible(false)}
+          >
+            <Text style={styles.modalButtonText}>Aceptar</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -219,25 +222,24 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f4f8',
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
-    color: 'purple',
+    color: '#6a1b9a',
   },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 10,
     marginBottom: 5,
     color: '#333',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#ddd',
     borderRadius: 8,
     padding: 10,
     backgroundColor: '#fff',
@@ -250,7 +252,7 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#ddd',
     borderRadius: 8,
     marginBottom: 10,
   },
@@ -258,7 +260,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: 10,
+    marginBottom: 20,
+  },
+  submitButton: {
+    backgroundColor: '#6a1b9a',
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: '#333',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#6a1b9a',
+    padding: 10,
+    borderRadius: 8,
+    width: 100,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
