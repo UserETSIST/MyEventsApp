@@ -1,3 +1,4 @@
+// components/EventCard/EventCard.tsx
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'; 
@@ -9,27 +10,27 @@ interface EventCardProps {
   title: string;
   date: string;
   image: string;
+  onPress: () => void; // New prop for handling card clicks
 }
 
-const EventCard: React.FC<EventCardProps> = ({ id, title, date, image }) => {
+const EventCard: React.FC<EventCardProps> = ({ id, title, date, image, onPress }) => {
   const { toggleFavorite, isFavorite } = useFavorites();
 
   const handleFavoriteToggle = () => {
-    toggleFavorite({ id, title, date, image }); // Use the `toggleFavorite` function from the context
+    toggleFavorite({ id, title, date, image }); 
   };
 
   return (
-    <TouchableOpacity style={styles.eventCard}>
+    <TouchableOpacity style={styles.eventCard} onPress={onPress}>
       <Image source={{ uri: image }} style={styles.eventImage} />
       <View style={styles.eventDetails}>
         <Text style={styles.eventTitle}>{title}</Text>
         <Text style={styles.eventDate}>{date}</Text>
       </View>
 
-      {/* Favorite Button */}
       <TouchableOpacity style={styles.favoriteButton} onPress={handleFavoriteToggle}>
         <MaterialCommunityIcons
-          name={isFavorite(id) ? 'star' : 'star-outline'} // Use the `isFavorite` function to determine the state
+          name={isFavorite(id) ? 'star' : 'star-outline'}
           size={24}
           color={isFavorite(id) ? 'gold' : '#888'}
         />

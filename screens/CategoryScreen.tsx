@@ -2,31 +2,43 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import EventCard from '../components/EventCard/EventCard';
 import { getAllEvents } from '../services/getEventsService';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const CategoryScreen = ({ route }) => {
-  const { category } = route.params; // Receives the selected category
+// Define the navigation parameter types directly here
+type RootStackParamList = {
+  CategoryScreen: { category: string };
+  EventDetailsScreen: { event: any }; // Ensure `EventDetailsScreen` is defined
+};
 
-  const [events, setEvents] = useState([]); // State to store events
-  const [loading, setLoading] = useState(true); // State to manage loading
+// Define the navigation prop type for this screen
+type NavigationProp = StackNavigationProp<RootStackParamList, 'CategoryScreen'>;
+
+const CategoryScreen = ({ route }: { route: { params: { category: string } } }) => {
+  const { category } = route.params;
+  const navigation = useNavigation<NavigationProp>();
+
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        setLoading(true); // Start loading
-        const allEvents = await getAllEvents(); // Fetch all events
+        setLoading(true);
+        const allEvents = await getAllEvents();
         const filteredEvents = allEvents.filter(
           (event) => event.category === category
-        ); // Filter events by category
-        setEvents(filteredEvents); // Update state with filtered events
+        );
+        setEvents(filteredEvents);
       } catch (error) {
         console.error('Error fetching events:', error);
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
-    fetchEvents(); // Trigger the fetch
-  }, [category]); // Run this effect whenever the category changes
+    fetchEvents();
+  }, [category]);
 
   return (
     <View style={styles.container}>
@@ -39,10 +51,11 @@ const CategoryScreen = ({ route }) => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <EventCard
-              id={item.id} // Pass the id of the event
+              id={item.id}
               title={item.title}
               date={item.date}
               image={item.image}
+              onPress={() => navigation.navigate('EventDetailsScreen', { event: item })}
             />
           )}
         />

@@ -4,7 +4,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { createStackNavigator } from '@react-navigation/stack';
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 //screens
@@ -12,6 +11,7 @@ import HomeScreen from "../screens/HomeScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
 import FormScreen from "../screens/FormScreen";
 import CategoryScreen from '../screens/CategoryScreen';
+import EventDetailsScreen from "../screens/EventDetailsScreen";
 
 
 const HomeStackNavigator = createStackNavigator();
@@ -22,6 +22,7 @@ function Stack() {
       <HomeStackNavigator.Screen  name="HomeScreen" component={HomeScreen}  options={{ headerShown: false }}/>
       <HomeStackNavigator.Screen name="New" component={FormScreen} />
       <HomeStackNavigator.Screen name="CategoryScreen" component={CategoryScreen} options={{ title: 'Eventos por Categoría' }}/>
+      <HomeStackNavigator.Screen name="EventDetailsScreen" component={EventDetailsScreen} options={{ title: 'Detalles del Evento' }} />
     </HomeStackNavigator.Navigator>
   );
 }

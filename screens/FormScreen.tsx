@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,33 +6,99 @@ import {
   Button,
   StyleSheet,
   Switch,
-  ScrollView,
+  ScrollView, 
+  Alert,
 } from 'react-native';
+import { getEventTypes } from '../services/getEventsService'; 
+import { Picker } from '@react-native-picker/picker';
+
+
 
 const FormScreen = () => {
   // States for inputs
-  const [eventName, setEventName] = useState('');
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [location, setLocation] = useState('');
-  const [category, setCategory] = useState('Concierto');
-  const [price, setPrice] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
+  const [address, setAddress] = useState('');
+  const [isFree, setIsFree] = useState(false);
+  const [contact, setContact] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [category, setCategory] = useState(''); // Selected category ID
+  const [categories, setCategories] = useState([]); // Available categories
 
-  const handleSubmit = () => {
-    // Here you can send the event data to a server or handle it as needed
-    console.log({
-      eventName,
-      description,
-      date,
-      time,
-      location,
-      category,
-      price,
-      isPublic,
-    });
-    alert('¡Evento creado con éxito!');
+  // Fetch categories from the API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const fetchedCategories = await getEventTypes();
+        setCategories(fetchedCategories); // Update categories state
+      } catch (error) {
+        console.error('Error fetching categories:', error.message);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleSubmit = async () => {
+    const eventData = {
+      ID_TEVE: category || "1", // ID por defecto si no se selecciona categoría
+      TITULO: title || "Título por defecto", // Título por defecto
+      UBICACION: location || "Ubicación por defecto", // Ubicación por defecto
+      DIRECCION: address || "Dirección por defecto", // Dirección por defecto
+      ENTGRATUITA: isFree ? "Sí" : "No", // Determina si es gratuito o no
+      FINICIO: startDate ? `${startDate}:00.000` : "2024-11-12 00:00:00.000", // Fecha de inicio predeterminada
+      FFINAL: endDate ? `${endDate}:00.000` : "2024-11-27 00:00:00.000", // Fecha final predeterminada
+      DESCRIPCION: description || "Descripción por defecto", // Descripción por defecto
+      IMAGEN: "https://via.placeholder.com/150", // Imagen predeterminada
+      CONTACTO: contact || "Contacto por defecto", // Contacto predeterminado
+      NOCONTACTO: contactNumber || "3132475803", // Número de contacto predeterminado
+      EMAILCONT: email || "email@por.defecto.com", // Email predeterminado
+      ESTADO: "Activo", // Estado predeterminado
+    };
+    
+
+    try {
+      console.log(eventData)
+      const response = await fetch(
+        'https://animalsveterinaria.net/go2event/api/v1.php?action=insert&table=even',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Basic QWRtaW46MTIzNDU=',
+          },
+          body: JSON.stringify(eventData),
+        }
+      );
+
+      console.log("Responsee: ",response)
+
+      if (response.ok) {
+        Alert.alert('¡Éxito!', 'El evento se ha creado correctamente.');
+        // Clear the form
+        setTitle('');
+        setDescription('');
+        setStartDate('');
+        setEndDate('');
+        setLocation('');
+        setAddress('');
+        setIsFree(false);
+        setContact('');
+        setContactNumber('');
+        setEmail('');
+        setCategory('');
+      } else {
+        const errorResponse = await response.json();
+        Alert.alert('Error', `No se pudo crear el evento: ${errorResponse.message}`);
+      }
+    } catch (error) {
+      console.error('Error creating event:', error.message);
+      Alert.alert('Error', 'No se pudo conectar con la API.');
+    }
   };
 
   return (
@@ -44,9 +110,23 @@ const FormScreen = () => {
       <TextInput
         style={styles.input}
         placeholder="Introduce el nombre del evento"
-        value={eventName}
-        onChangeText={setEventName}
+        value={title}
+        onChangeText={setTitle}
       />
+
+      {/* Categoría */}
+      <Text style={styles.label}>Categoría</Text>
+            <View style={styles.dropdown}>
+              <Picker
+                selectedValue={category}
+                onValueChange={(value) => setCategory(value)}
+              >
+                <Picker.Item label="Selecciona una categoría" value="" />
+                {categories.map((cat) => (
+                  <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
+                ))}
+              </Picker>
+            </View>
 
       {/* Descripción */}
       <Text style={styles.label}>Descripción</Text>
@@ -58,59 +138,76 @@ const FormScreen = () => {
         multiline
       />
 
-      {/* Fecha */}
-      <Text style={styles.label}>Fecha (DD/MM/YYYY)</Text>
+      {/* Fecha Inicio */}
+      <Text style={styles.label}>Fecha Inicio (YYYY-MM-DD HH:MM)</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ejemplo: 25/12/2024"
-        value={date}
-        onChangeText={setDate}
-        keyboardType="numeric"
+        placeholder="Ejemplo: 2024-11-12 00:00"
+        value={startDate}
+        onChangeText={setStartDate}
       />
 
-      {/* Hora */}
-      <Text style={styles.label}>Hora (HH:MM)</Text>
+      {/* Fecha Final */}
+      <Text style={styles.label}>Fecha Final (YYYY-MM-DD HH:MM)</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ejemplo: 18:30"
-        value={time}
-        onChangeText={setTime}
-        keyboardType="numeric"
+        placeholder="Ejemplo: 2024-11-27 00:00"
+        value={endDate}
+        onChangeText={setEndDate}
       />
 
       {/* Ubicación */}
       <Text style={styles.label}>Ubicación</Text>
       <TextInput
         style={styles.input}
-        placeholder="Introduce la dirección del evento"
+        placeholder="Ubicación. Ej: Polideportivo El Cerro"
         value={location}
         onChangeText={setLocation}
       />
 
-      {/* Categoría */}
-      <Text style={styles.label}>Categoría</Text>
+      {/* Dirección */}
+      <Text style={styles.label}>Dirección</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ejemplo: Concierto, Conferencia"
-        value={category}
-        onChangeText={setCategory}
+        placeholder="Dirección: Ej: Calle Pablo Neruda 27"
+        value={address}
+        onChangeText={setAddress}
       />
 
-      {/* Precio */}
-      <Text style={styles.label}>Precio</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Introduce el precio (Ejemplo: 0 para gratuito)"
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="numeric"
-      />
-
-      {/* Evento Público */}
+      {/* Entrada Gratuita */}
       <View style={styles.switchContainer}>
-        <Text style={styles.label}>¿Evento público?</Text>
-        <Switch value={isPublic} onValueChange={setIsPublic} />
+        <Text style={styles.label}>¿Entrada gratuita?</Text>
+        <Switch value={isFree} onValueChange={setIsFree} />
       </View>
+
+      {/* Contacto */}
+      <Text style={styles.label}>Contacto</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Introduce el nombre del contacto"
+        value={contact}
+        onChangeText={setContact}
+      />
+
+      {/* Número de Contacto */}
+      <Text style={styles.label}>Número de Contacto</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Introduce el número de contacto"
+        value={contactNumber}
+        onChangeText={setContactNumber}
+        keyboardType="phone-pad"
+      />
+
+      {/* Email */}
+      <Text style={styles.label}>Email</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Introduce el email de contacto"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+      />
 
       {/* Botón para Guardar */}
       <Button title="Guardar Evento" onPress={handleSubmit} color="purple" />
@@ -150,6 +247,12 @@ const styles = StyleSheet.create({
   textArea: {
     height: 100,
     textAlignVertical: 'top',
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 10,
   },
   switchContainer: {
     flexDirection: 'row',

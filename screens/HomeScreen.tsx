@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import EventCard from '../components/EventCard/EventCard';
-import { getRandomEvents, getEventTypes } from '../services/getEventsService'; // Adjust paths as necessary
+import { getRandomEvents, getEventTypes } from '../services/getEventsService'; 
 import CustomButton from '../components/CustomButton/CustomButton';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -20,6 +20,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 export type RootStackParamList = {
   HomeScreen: undefined;
   CategoryScreen: { category: string };
+  EventDetailsScreen: { event: any }; // Add EventDetailsScreen
   New: undefined;
 };
 
@@ -68,6 +69,11 @@ function HomeScreen() {
   // Navigate to the CategoryScreen with the selected category
   const handleCategoryPress = (categoryName: string) => {
     navigation.navigate('CategoryScreen', { category: categoryName });
+  };
+
+  // Navigate to the EventDetailsScreen for the selected event
+  const handleEventPress = (event: any) => {
+    navigation.navigate('EventDetailsScreen', { event });
   };
 
   return (
@@ -124,6 +130,7 @@ function HomeScreen() {
                   title={item.title}
                   date={item.date}
                   image={item.image}
+                  onPress={() => handleEventPress(item)} // Navigate to EventDetailsScreen
                 />
               )}
             />
