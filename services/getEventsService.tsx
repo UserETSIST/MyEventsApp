@@ -1,10 +1,11 @@
 
 export const getAllEvents = async () => {
+  //
   const API_URL =
-    'https://animalsveterinaria.net/go2event/api/v1.php?action=list&table=EVEN';
+    'https://labsumincol.net/go2event/v1/list/even';
 
   const headers = {
-    Authorization: `Basic QWRtaW46MTIzNDU=`, // Basic Authentication Header
+    Authorization: `3d524a53c110e4c22463b10ed32cef9d`, // Basic Authentication Header
   };
 
   try {
@@ -16,7 +17,13 @@ export const getAllEvents = async () => {
     }
 
     const apiEvents = await response.json();
-    const eventsData = apiEvents.data; // Array de eventos
+    // Verificar que apiEventTypes y apiEventTypes.data no sean undefined
+    if (!apiEvents || !apiEvents.registros) {
+      //throw new Error('La respuesta de la API (getAllEvents) no contiene datos válidos.');
+      return [];
+    }
+
+    const eventsData = apiEvents.registros; // Array de eventos
 
     // Obtener los tipos de eventos
     const eventTypes = await getEventTypes();
@@ -74,9 +81,9 @@ export const getRandomEvents = async () => {
 
 
 export const getEventTypes = async () => {
-  const API_URL = 'https://animalsveterinaria.net/go2event/api/v1.php?action=list&table=TEVE';
+  const API_URL = 'https://labsumincol.net/go2event/v1/list/teve';
   const headers = {
-    Authorization: 'Basic QWRtaW46MTIzNDU=',
+    Authorization: '3d524a53c110e4c22463b10ed32cef9d',
   };
 
   try {
@@ -88,7 +95,14 @@ export const getEventTypes = async () => {
     }
 
     const apiEventTypes = await response.json();
-    const data = apiEventTypes.data;
+
+    // Verificar que apiEventTypes y apiEventTypes.data no sean undefined
+    if (!apiEventTypes || !apiEventTypes.registros) {
+      //throw new Error('La respuesta de la API (getEventTypes) no contiene datos válidos.');
+      return [];
+    }
+
+    const data = apiEventTypes.registros;
 
     // Transformar los tipos de eventos al formato deseado
     const transformedEventTypes = data.map((type: any) => ({
@@ -106,13 +120,14 @@ export const getEventTypes = async () => {
 
 
 export const getEventsByCategory = async (categoryId: string) => {
-  const API_URL = `https://animalsveterinaria.net/go2event/api/v1.php?action=list&records=10&table=EVEN&q=(ID_TEVE~equals~${categoryId})`;
+  const API_URL = `https://labsumincol.net/go2event/v1/list/even?categoria=${categoryId}`;
   const headers = {
-    Authorization: 'Basic QWRtaW46MTIzNDU=', // Autenticación básica
+    Authorization: '3d524a53c110e4c22463b10ed32cef9d', // Autenticación básica
   };
 
   try {
     console.log(`Fetching events for category ID: ${categoryId}...`);
+    console.log(`Api URLs for category ID:`, API_URL);
     const response = await fetch(API_URL, { headers });
 
     if (!response.ok) {
@@ -120,14 +135,18 @@ export const getEventsByCategory = async (categoryId: string) => {
     }
 
     const apiResponse = await response.json();
-    console.log("Dataaaa: ", apiResponse.data);
+    console.log("Dataaaa: ", apiResponse.registros);
     
-    if (!apiResponse.data) {
+    if (!apiResponse.registros) {
       throw new Error('No data received from the API');
     }
 
-
-    return apiResponse.data;
+    // Verificar que apiResponse y apiResponse.data no sean undefined
+    if (!apiResponse || !apiResponse.registros) {
+      throw new Error('La respuesta de la API (getEventsByCategory) no contiene datos válidos.');
+      return [];
+    }
+    return apiResponse.registros;
   } catch (error) {
     console.error('Error loading events by category:', error.message);
     return [];
