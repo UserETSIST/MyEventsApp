@@ -4,6 +4,8 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'; 
 import styles from './EventCardStyles';
 import { useFavorites } from '../../services/FavoritesContext'; 
+import DateTimePicker from 'react-native-ui-datepicker';
+import dayjs from 'dayjs';
 
 interface EventCardProps {
   id: string;

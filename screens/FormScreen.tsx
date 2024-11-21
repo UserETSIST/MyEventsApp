@@ -1,16 +1,22 @@
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
+
 import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   TextInput,
+  Platform,
   StyleSheet,
   Switch,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { getEventTypes } from '../services/getEventsService';
+import { getEventTypes, insertEvent } from '../services/getEventsService';
 import { Picker } from '@react-native-picker/picker';
 import Modal from 'react-native-modal'; // Import the modal library
+
+
 
 const FormScreen = () => {
   const [title, setTitle] = useState('');
@@ -27,12 +33,39 @@ const FormScreen = () => {
   const [categories, setCategories] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false); // Modal visibility state
   const [modalMessage, setModalMessage] = useState(''); // Modal message state
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
+   // Función para formatear la fecha y hora
+   const formatDateTime = (date) => {
+    const options = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+    return new Intl.DateTimeFormat('es-ES', options).format(date);
+  };
+
+  const handleStartDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || startDate;
+    setShowStartPicker(Platform.OS === 'ios');
+    setStartDate(currentDate);
+  };
+
+  const handleEndDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || endDate;
+    setShowEndPicker(Platform.OS === 'ios');
+    setEndDate(currentDate);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const fetchedCategories = await getEventTypes();
-        setCategories(fetchedCategories);
+        setCategories(fetchedCategories);        
+        console.log('Categories:', fetchedCategories);
       } catch (error) {
         console.error('Error fetching categories:', error.message);
       }
@@ -43,35 +76,27 @@ const FormScreen = () => {
 
   const handleSubmit = async () => {
     const eventData = {
-      ID_TEVE: category || '1',
-      TITULO: title || 'Título por defecto',
-      UBICACION: location || 'Ubicación por defecto',
-      DIRECCION: address || 'Dirección por defecto',
-      ENTGRATUITA: isFree ? 'Sí' : 'No',
-      FINICIO: startDate ? `${startDate}:00.000` : '2024-11-12 00:00:00.000',
-      FFINAL: endDate ? `${endDate}:00.000` : '2024-11-27 00:00:00.000',
-      DESCRIPCION: description || 'Descripción por defecto',
-      IMAGEN: 'https://via.placeholder.com/150',
-      CONTACTO: contact || 'Contacto por defecto',
-      NOCONTACTO: contactNumber || '3132475803',
-      EMAILCONT: email || 'email@por.defecto.com',
-      ESTADO: 'Activo',
+      id_teve: category || '1',
+      titulo: title || 'Título por defecto',
+      ubicacion: location || 'Ubicación por defecto',
+      direccion: address || 'Dirección por defecto',
+      entgratuita: isFree ? 'Sí' : 'No',
+      finicio: startDate ? `${startDate}:00.000` : '2024-11-12 00:00:00.000',
+      ffinal: endDate ? `${endDate}:00.000` : '2024-11-27 00:00:00.000',
+      descripcion: description || 'Descripción por defecto',
+      imagen: 'https://via.placeholder.com/150',
+      contacto: contact || 'Contacto por defecto',
+      nocontacto: contactNumber || '3132475803',
+      emailcont: email || 'email@por.defecto.com',
+      estado: 'Activo',
     };
 
     try {
-      const response = await fetch(
-        'https://animalsveterinaria.net/go2event/api/v1.php?action=insert&table=even',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Basic QWRtaW46MTIzNDU=',
-          },
-          body: JSON.stringify(eventData),
-        }
-      );
+      const result = await insertEvent(eventData);
+      setModalMessage(result.message);
+      setIsModalVisible(true);
 
-      if (response.ok) {
+      if (result.success) {
         setModalMessage('¡Éxito! El evento se ha creado correctamente.');
         setIsModalVisible(true);
         setTitle('');
@@ -85,18 +110,15 @@ const FormScreen = () => {
         setContactNumber('');
         setEmail('');
         setCategory('');
-      } else {
-        const errorResponse = await response.json();
-        setModalMessage(`Error: No se pudo crear el evento: ${errorResponse.message}`);
-        setIsModalVisible(true);
-      }
+      } 
     } catch (error) {
-      console.error('Error creating event:', error.message);
-      setModalMessage('Error: No se pudo conectar con la API.');
+      console.error('Error en handleSubmit:', error.message);
+      setModalMessage('Error 1: No se pudo conectar con la API.');
       setIsModalVisible(true);
     }
   };
 
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Crear Nuevo Evento</Text>

@@ -1,11 +1,12 @@
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
 
 export const getAllEvents = async () => {
   //
-  const API_URL =
-    'https://labsumincol.net/go2event/v1/list/even';
-
+  // console.error('API_BASE_URL:', API_BASE_URL);
+  const API_URL = `${API_BASE_URL}/list/even`;
   const headers = {
-    Authorization: `3d524a53c110e4c22463b10ed32cef9d`, // Basic Authentication Header
+    Authorization: API_KEY,
   };
 
   try {
@@ -14,6 +15,7 @@ export const getAllEvents = async () => {
 
     if (!response.ok) {
       throw new Error(`Error fetching events: ${response.statusText}`);
+      return [];
     }
 
     const apiEvents = await response.json();
@@ -81,13 +83,13 @@ export const getRandomEvents = async () => {
 
 
 export const getEventTypes = async () => {
-  const API_URL = 'https://labsumincol.net/go2event/v1/list/teve';
+  const API_URL = `${API_BASE_URL}/list/teve`;
   const headers = {
-    Authorization: '3d524a53c110e4c22463b10ed32cef9d',
+    Authorization: API_KEY,
   };
 
   try {
-    console.log('Fetching event types from API...');
+    //console.log('Fetching event types from API...');
     const response = await fetch(API_URL, { headers });
 
     if (!response.ok) {
@@ -110,7 +112,7 @@ export const getEventTypes = async () => {
       name: type.DESCRIPCION || 'Sin categoría',
     }));
 
-    console.log('Event Types:', transformedEventTypes);
+    //console.log('Event Types:', transformedEventTypes);
     return transformedEventTypes;
   } catch (error) {
     console.error('Error loading event types:', error.message);
@@ -120,22 +122,24 @@ export const getEventTypes = async () => {
 
 
 export const getEventsByCategory = async (categoryId: string) => {
-  const API_URL = `https://labsumincol.net/go2event/v1/list/even?categoria=${categoryId}`;
+  const API_URL = `${API_BASE_URL}/list/even?categoria=${categoryId}`;
   const headers = {
-    Authorization: '3d524a53c110e4c22463b10ed32cef9d', // Autenticación básica
+    Authorization: API_KEY,
   };
 
+
   try {
-    console.log(`Fetching events for category ID: ${categoryId}...`);
-    console.log(`Api URLs for category ID:`, API_URL);
+    //console.log(`Fetching events for category ID: ${categoryId}...`);
+    //console.log(`Api URLs for category ID:`, API_URL);
     const response = await fetch(API_URL, { headers });
 
     if (!response.ok) {
       throw new Error(`Error fetching events: ${response.statusText}`);
+      return [];
     }
 
     const apiResponse = await response.json();
-    console.log("Dataaaa: ", apiResponse.registros);
+    //console.log("Dataaaa: ", apiResponse.registros);
     
     if (!apiResponse.registros) {
       throw new Error('No data received from the API');
@@ -151,4 +155,40 @@ export const getEventsByCategory = async (categoryId: string) => {
     console.error('Error loading events by category:', error.message);
     return [];
   }
+
 };
+
+
+//  insertar evento
+export const insertEvent = async (eventData) => {
+  const API_URL = API_BASE_URL;
+  const formBody = new URLSearchParams(eventData).toString();
+  try {
+    console.log('JSON del evento:', JSON.stringify(eventData));
+    // data manual
+    
+    const response = await fetch(`${API_URL}/insert/even`, {
+      method: 'POST',
+      headers: {
+        Authorization: API_KEY,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formBody,
+    });
+
+    if (response.ok) {
+      const data = await response.json(); // Parsear el JSON de la respuesta
+      console.log('Request',data.message)
+      return { success: true, 
+               message: data.message, // Pasamos el mensaje desde la respuesta
+             };
+    } else {
+      const errorResponse = await response.json();
+      return { success: false, message: `Error: ${errorResponse.message}` };
+    }
+  } catch (error) {
+    console.error('Error insert event:', error.message);
+    return { success: false, message: 'Error: No se pudo conectar con la API.' };
+  }
+};
+
