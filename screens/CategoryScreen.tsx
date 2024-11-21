@@ -43,7 +43,7 @@ const CategoryScreen = ({ route }) => {
       ) : events.length > 0 ? (
         <FlatList
           data={events}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.ID}
           renderItem={({ item }) => (
             <EventCard
               id={item.ID}

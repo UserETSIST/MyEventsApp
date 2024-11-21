@@ -15,14 +15,15 @@ import {
 import { getEventTypes, insertEvent } from '../services/getEventsService';
 import { Picker } from '@react-native-picker/picker';
 import Modal from 'react-native-modal'; // Import the modal library
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 
 const FormScreen = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [location, setLocation] = useState('');
   const [address, setAddress] = useState('');
   const [isFree, setIsFree] = useState(false);
@@ -35,6 +36,15 @@ const FormScreen = () => {
   const [modalMessage, setModalMessage] = useState(''); // Modal message state
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+
+  const handleDateChange = (event, selectedDate, setDate, closePicker) => {
+    if (event.type === 'set') {
+      // Actualiza la fecha seleccionada
+      setDate(selectedDate || new Date());
+    }
+    closePicker(false); // Cierra el selector
+  };
+
 
    // Función para formatear la fecha y hora
    const formatDateTime = (date) => {
@@ -60,6 +70,8 @@ const FormScreen = () => {
     setEndDate(currentDate);
   };
 
+  
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -81,8 +93,8 @@ const FormScreen = () => {
       ubicacion: location || 'Ubicación por defecto',
       direccion: address || 'Dirección por defecto',
       entgratuita: isFree ? 'Sí' : 'No',
-      finicio: startDate ? `${startDate}:00.000` : '2024-11-12 00:00:00.000',
-      ffinal: endDate ? `${endDate}:00.000` : '2024-11-27 00:00:00.000',
+      finicio: startDate.toISOString(),
+      ffinal: endDate.toISOString(),
       descripcion: description || 'Descripción por defecto',
       imagen: 'https://via.placeholder.com/150',
       contacto: contact || 'Contacto por defecto',
@@ -90,7 +102,6 @@ const FormScreen = () => {
       emailcont: email || 'email@por.defecto.com',
       estado: 'Activo',
     };
-
     try {
       const result = await insertEvent(eventData);
       setModalMessage(result.message);
@@ -101,8 +112,8 @@ const FormScreen = () => {
         setIsModalVisible(true);
         setTitle('');
         setDescription('');
-        setStartDate('');
-        setEndDate('');
+        // setStartDate('');
+        // setEndDate('');
         setLocation('');
         setAddress('');
         setIsFree(false);
@@ -153,21 +164,41 @@ const FormScreen = () => {
         multiline
       />
 
-      <Text style={styles.label}>Fecha Inicio (YYYY-MM-DD HH:MM)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ejemplo: 2024-11-12 00:00"
-        value={startDate}
-        onChangeText={setStartDate}
-      />
+<Text style={styles.label}>Fecha Inicio</Text>
+      <TouchableOpacity
+        style={styles.datePickerButton}
+        onPress={() => setShowStartPicker(true)}
+      >
+        <Text>{startDate.toISOString().split('T')[0]}</Text>
+      </TouchableOpacity>
+      {showStartPicker && (
+        <DateTimePicker
+          value={startDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, selectedDate) =>
+            handleDateChange(event, selectedDate, setStartDate, setShowStartPicker)
+          }
+        />
+      )}
 
-      <Text style={styles.label}>Fecha Final (YYYY-MM-DD HH:MM)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ejemplo: 2024-11-27 00:00"
-        value={endDate}
-        onChangeText={setEndDate}
-      />
+      <Text style={styles.label}>Fecha Final</Text>
+      <TouchableOpacity
+        style={styles.datePickerButton}
+        onPress={() => setShowEndPicker(true)}
+      >
+        <Text>{endDate.toISOString().split('T')[0]}</Text>
+      </TouchableOpacity>
+      {showEndPicker && (
+        <DateTimePicker
+          value={endDate}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={(event, selectedDate) =>
+            handleDateChange(event, selectedDate, setEndDate, setShowEndPicker)
+          }
+        />
+      )}
 
       <Text style={styles.label}>Ubicación</Text>
       <TextInput
@@ -267,6 +298,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
     marginBottom: 10,
+  },
+  datePickerButton: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+    alignItems: 'center',
   },
   textArea: {
     height: 100,
