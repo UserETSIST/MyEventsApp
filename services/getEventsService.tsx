@@ -1,5 +1,39 @@
+import { useState, useEffect } from 'react';
+import {
+  Text,
+  View,
+  ImageBackground,
+  SafeAreaView,
+  StyleSheet,
+  ImageSourcePropType,
+  FlatList,
+} from "react-native";
+
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY;
+
+interface Category {
+  ID: string;
+  DESCRIPCION: string;
+  ESTADO: string;
+}
+interface Event {
+  ID: string;
+  ID_TEVE: number;
+  TITULO: string;
+  UBICACION: string;
+  DIRECCION: string;
+  ENTGRATUITA: string;
+  FINICIO: string;
+  FFINAL: string;
+  DESCRIPCION: string;
+  IMAGEN: string;
+  CONTACTO: string;
+  NOCONTACTO: string;
+  EMAILCONT: string;
+  ESTADO: string;
+  DESTACADO: number | null;
+}
 
 export const getAllEvents = async () => {
   //
@@ -105,7 +139,6 @@ export const getEventTypes = async () => {
     }
 
     const data = apiEventTypes.registros;
-
     // Transformar los tipos de eventos al formato deseado
     const transformedEventTypes = data.map((type: any) => ({
       id: type.ID.toString(),
@@ -126,8 +159,6 @@ export const getEventsByCategory = async (categoryId: string) => {
   const headers = {
     Authorization: API_KEY,
   };
-
-
   try {
     //console.log(`Fetching events for category ID: ${categoryId}...`);
     //console.log(`Api URLs for category ID:`, API_URL);
@@ -139,8 +170,7 @@ export const getEventsByCategory = async (categoryId: string) => {
     }
 
     const apiResponse = await response.json();
-    //console.log("Dataaaa: ", apiResponse.registros);
-    
+    //console.log("Dataaaa: ", apiResponse.registros);   
     if (!apiResponse.registros) {
       throw new Error('No data received from the API');
     }
@@ -157,7 +187,6 @@ export const getEventsByCategory = async (categoryId: string) => {
   }
 
 };
-
 
 //  insertar evento
 export const insertEvent = async (eventData) => {
@@ -191,4 +220,64 @@ export const insertEvent = async (eventData) => {
     return { success: false, message: 'Error: No se pudo conectar con la API.' };
   }
 };
+
+// retorno del servicio
+type EventsResponse = {
+  events: any[];
+  totalRecords: number;
+};
+
+export const getEventsPage = async (pageNo: number): Promise<EventsResponse> => {
+  const API_URL = `${API_BASE_URL}/list/even?page=${pageNo}&limit=7`;
+  const headers = { Authorization: API_KEY };
+
+  try {
+    //console.log('Fetching getEventsPage from API...');
+    const response = await fetch(API_URL, { headers });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching events: ${response.statusText}`);
+      return { events: [], totalRecords: 0 };
+    }
+
+    const apiEvents = await response.json();
+    // Verificar que apiEventTypes y apiEventTypes.data no sean undefined
+    if (!apiEvents || !apiEvents.registros) {
+      //throw new Error('La respuesta de la API (getEventsPage) no contiene datos válidos.');
+      return { events: [], totalRecords: 0 };
+    }
+
+    const eventsData = apiEvents.registros; // Array de eventos
+    const totalRecords = apiEvents.pagination.total_records;
+
+    // Obtener los tipos de eventos
+    const eventTypes = await getEventTypes();
+
+    // Mapear y transformar los eventos
+    const transformedEvents = eventsData.map((event: any) => {
+      // Buscar la categoría correspondiente
+      const matchedCategory = eventTypes.find(
+        (type) => type.id === event.ID_TEVE.toString()
+      );
+      return {
+        id: event.ID.toString(),
+        title: event.TITULO || 'Evento sin título', // Default if title is null
+        date: event.FINICIO.split(' ')[0], // Extract date
+        time: event.FINICIO.split(' ')[1], // Extract time
+        description: event.DESCRIPCION || 'Sin descripción disponible',
+        location: event.UBICACION || 'Ubicación no especificada',
+        category: matchedCategory ? matchedCategory.name : 'General', // Asignar nombre de categoría
+        price: event.ENTGRATUITA === 'Si' ? 0 : 20, // Lógica de precio
+        isPublic: event.ENTGRATUITA === 'Si', // Determinar si es público
+        image: event.IMAGEN || 'https://via.placeholder.com/150', // Fallback image
+      };
+    });
+    // Devuelve tanto los eventos como el número adicional
+    return { events: transformedEvents, totalRecords };
+  } catch (error) {
+    //console.error('Error loading events:', error.message);
+    return { events: [], totalRecords: 0 };
+  }
+};
+
 
